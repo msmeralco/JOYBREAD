@@ -1,36 +1,116 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🚀 KILOS Bill Decoder
 
-## Getting Started
+A multi-agent AI system for analyzing electricity bills with OCR, parsing, appliance breakdown, and actionable insights.
 
-First, run the development server:
+## Quick Start
 
 ```bash
+# Install dependencies
+npm install
+
+# Run development server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) to use the application.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Features
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- 📸 **OCR Processing**: Extract text from bill images using Tesseract.js
+- 📋 **Smart Parsing**: AI-powered extraction of consumption, costs, and billing data
+- 🔌 **Appliance Breakdown**: Detailed analysis of energy consumption by appliance
+- 💡 **Insights & Tips**: Personalized recommendations to reduce electricity costs
+- 🏆 **Gamification**: KILOS score and achievement badges
 
-## Learn More
+## Architecture
 
-To learn more about Next.js, take a look at the following resources:
+### Multi-Agent System
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```
+📸 OCR Agent → 📋 Parser Agent → 🔌 Appliance Analyzer → 💡 Insights Agent
+                              ↓
+                        Orchestrator
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Each agent is specialized and independent:
 
-## Deploy on Vercel
+- **OCR Agent**: Image-to-text extraction
+- **Parser Agent**: Structured data extraction from text
+- **Appliance Analyzer**: Energy consumption breakdown
+- **Insights Agent**: Recommendations and scoring
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Tech Stack
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **Framework**: Next.js 16 with React 19
+- **Language**: TypeScript
+- **OCR**: Tesseract.js
+- **AI**: Google Generative AI / OpenAI
+- **Database**: Firebase
+- **Styling**: Tailwind CSS
+
+## Project Structure
+
+```
+├── app/
+│   ├── api/
+│   │   ├── analyze-text/      # Text analysis endpoint
+│   │   └── chat-simple/        # Chatbot endpoint
+│   ├── layout.tsx
+│   └── page.tsx
+├── components/
+│   └── SimpleChatbot.tsx       # Chat interface
+├── lib/
+│   └── agents/
+│       ├── index.ts            # Orchestrator
+│       ├── parser-agent.ts     # Main parsing logic
+│       └── types.ts            # Type definitions
+└── firebase/
+    └── firebase.ts             # Firebase config
+```
+
+## Environment Variables
+
+Create a `.env.local` file:
+
+```env
+NEXT_PUBLIC_FIREBASE_API_KEY=your_firebase_api_key
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_auth_domain
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_project_id
+OPENAI_API_KEY=your_openai_key
+GOOGLE_API_KEY=your_google_ai_key
+```
+
+## Usage
+
+1. **Upload a bill image** (drag & drop or click)
+2. **Click "Analyze Bill"**
+3. **View results**:
+   - Consumption breakdown
+   - Appliance-level costs
+   - Money-saving tips
+   - KILOS Score & badges
+
+## Development
+
+```bash
+# Run dev server
+npm run dev
+
+# Build for production
+npm run build
+
+# Start production server
+npm start
+
+# Run linter
+npm run lint
+```
+
+## API Endpoints
+
+- `POST /api/analyze-text` - Analyze bill text
+- `POST /api/chat-simple` - Chatbot interactions
+
+## License
+
+Private project for KILOS Hackathon
