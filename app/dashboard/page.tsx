@@ -18,6 +18,11 @@ export default function DashboardPage() {
   const currentConsumption = useAppStore((state) => state.currentConsumption)
   const lastMonthConsumption = useAppStore((state) => state.lastMonthConsumption)
   const estimatedCost = useAppStore((state) => state.estimatedCost)
+  const addKilosPoints = useAppStore((state) => state.addKilosPoints)
+
+  const handleSecretPoints = () => {
+    addKilosPoints(100)
+  }
 
   useEffect(() => {
     if (!user) {
@@ -72,7 +77,7 @@ export default function DashboardPage() {
             initial={{ opacity: 0, scale: 0 }}
             animate={{ opacity: 1, scale: 1 }}
             whileTap={{ scale: 0.95 }}
-            onClick={() => router.push('/profile')}
+            onClick={handleSecretPoints}
             className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center"
           >
             {user.photoURL ? (

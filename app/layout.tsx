@@ -42,7 +42,9 @@ export default function RootLayout({
       <body className="antialiased overflow-x-hidden">
         <AuthProvider>
           <RouteGuard>
-            {children}
+            <div className="max-w-md mx-auto relative">
+              {children}
+            </div>
           </RouteGuard>
         </AuthProvider>
       </body>
