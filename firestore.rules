@@ -36,5 +36,50 @@ service cloud.firestore {
       allow read: if isAuthenticated();
       allow write: if isOwner(userId);
     }
+    
+    // Gamification: User gamification profiles
+    match /user_gamification/{userId} {
+      allow read: if isAuthenticated();
+      allow write: if isOwner(userId);
+    }
+    
+    // Gamification: Point transactions
+    match /point_transactions/{transactionId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update, delete: if false; // Transactions are immutable
+    }
+    
+    // Gamification: User achievements
+    match /user_achievements/{achievementId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update, delete: if false; // Achievements are immutable
+    }
+    
+    // Gamification: Daily quests
+    match /daily_quests/{questId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated();
+    }
+    
+    // Gamification: Onboarding progress
+    match /onboarding_progress/{userId} {
+      allow read: if isAuthenticated();
+      allow write: if isOwner(userId);
+    }
+    
+    // Gamification: Household appliances
+    match /household_appliances/{userId} {
+      allow read: if isAuthenticated();
+      allow write: if isOwner(userId);
+    }
+
+    // Monthly challenges
+    match /monthly_challenges/{challengeId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated();
+    }
   }
 }

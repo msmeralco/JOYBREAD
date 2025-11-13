@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
+import { updateChallengeProgress } from '@/lib/services/challenges';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Camera, Upload, ArrowLeft, History, Zap, Send, Loader2, X, FileText, Calendar, Trash2 } from 'lucide-react';
 import { BottomNav } from '@/components/BottomNav';
@@ -205,6 +206,13 @@ export default function ScanPage() {
       });
 
       console.log(`[Bill Upload] Bill saved with ID: ${billDoc.id}`);
+
+      // Update monthly challenge progress
+      try {
+        await updateChallengeProgress(user.uid, 'bill_scan', 1);
+      } catch (error) {
+        console.error('Error updating challenge progress:', error);
+      }
 
       // Set bill data
       setCurrentBill({
@@ -608,7 +616,7 @@ export default function ScanPage() {
                     className={`max-w-[85%] ${
                       message.role === 'user'
                         ? 'bg-gradient-to-br from-purple-500 to-indigo-600 text-white border-0'
-                        : 'bg-white'
+                        : 'bg-gray-100 text-gray-900'
                     }`}
                   >
                     <CardContent className="p-3">
