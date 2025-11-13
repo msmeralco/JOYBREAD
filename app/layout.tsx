@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/lib/auth-context";
 import { RouteGuard } from "@/lib/route-guard";
+import { FirestoreProvider } from "@/components/FirestoreProvider";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -41,11 +42,13 @@ export default function RootLayout({
     <html lang="en" className={inter.variable}>
       <body className="antialiased overflow-x-hidden">
         <AuthProvider>
-          <RouteGuard>
+          <FirestoreProvider>
+           <RouteGuard>
             <div className="max-w-md mx-auto relative">
               {children}
             </div>
           </RouteGuard>
+          </FirestoreProvider>
         </AuthProvider>
       </body>
     </html>
