@@ -3,7 +3,7 @@
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { Zap, TrendingDown, ScanLine, Map, User } from 'lucide-react'
+import { Zap, TrendingDown, ScanLine, Map, User, MessageSquare } from 'lucide-react'
 import { useAppStore } from '@/lib/store'
 import { BottomNav } from '@/components/BottomNav'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -198,20 +198,19 @@ export default function DashboardPage() {
           <div className="grid grid-cols-2 gap-3">
             <Button
               onClick={() => router.push('/scan')}
+              className="h-24 flex-col gap-2 bg-gradient-to-br from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white border-0"
+            >
+              <MessageSquare className="w-6 h-6" />
+              <span>Bill Decoder</span>
+            </Button>
+
+            <Button
+              onClick={() => router.push('/challenges')}
               className="h-24 flex-col gap-2"
               variant="outline"
             >
               <ScanLine className="w-6 h-6" />
-              <span>Scan New Bill</span>
-            </Button>
-
-            <Button
-              onClick={() => router.push('/hazard-map')}
-              className="h-24 flex-col gap-2"
-              variant="outline"
-            >
-              <Map className="w-6 h-6" />
-              <span>View Hazard Map</span>
+              <span>Challenges</span>
             </Button>
           </div>
         </motion.div>

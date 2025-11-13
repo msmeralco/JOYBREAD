@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { User, Trophy, Gift, Clock, LogOut, Zap, Medal } from 'lucide-react'
 import { useAppStore } from '@/lib/store'
+import { useAuth } from '@/lib/auth-context'
 import { BottomNav } from '@/components/BottomNav'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -17,7 +18,7 @@ export default function ProfilePage() {
   const availableRewards = useAppStore((state) => state.availableRewards)
   const activityLogs = useAppStore((state) => state.activityLogs)
   const redeemReward = useAppStore((state) => state.redeemReward)
-  const logout = useAppStore((state) => state.logout)
+  const { logout: firebaseLogout } = useAuth()
 
   const [showRedeemModal, setShowRedeemModal] = useState(false)
   const [selectedReward, setSelectedReward] = useState<string | null>(null)
@@ -43,9 +44,13 @@ export default function ProfilePage() {
     }
   }
 
-  const handleLogout = () => {
-    logout()
-    router.push('/')
+  const handleLogout = async () => {
+    try {
+      await firebaseLogout()
+      router.push('/')
+    } catch (error) {
+      console.error('Logout error:', error)
+    }
   }
 
   return (

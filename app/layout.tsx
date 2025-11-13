@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import { AuthProvider } from "@/lib/auth-context";
+import { RouteGuard } from "@/lib/route-guard";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -38,7 +40,11 @@ export default function RootLayout({
   return (
     <html lang="en" className={inter.variable}>
       <body className="antialiased overflow-x-hidden">
-        {children}
+        <AuthProvider>
+          <RouteGuard>
+            {children}
+          </RouteGuard>
+        </AuthProvider>
       </body>
     </html>
   );

@@ -12,7 +12,7 @@ const conversationStore = new Map<string, ConversationTurn[]>();
 
 export async function POST(request: NextRequest) {
   try {
-    const { query, billData, sessionId } = await request.json();
+    const { query, billData, sessionId, billId, userId, saveToFirestore = false } = await request.json();
 
     if (!query) {
       return NextResponse.json(
@@ -158,6 +158,12 @@ IMPORTANT:
     }
 
     conversationStore.set(currentSessionId, conversationHistory);
+
+    // Note: Message saving moved to client-side to avoid permission issues
+    // Client will handle Firestore persistence with proper authentication
+    if (saveToFirestore && billId && userId) {
+      console.log('[Simple Chat] Message persistence handled by client');
+    }
 
     console.log('[Simple Chat] Returning successful response');
     return NextResponse.json({
