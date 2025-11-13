@@ -11,6 +11,16 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { formatNumber } from '@/lib/utils'
 
+// Calculate user's rank based on their barangay and city
+function getUserRank(city: string, barangay: string): number {
+  let hash = 0
+  for (let i = 0; i < barangay.length; i++) {
+    hash = ((hash << 5) - hash) + barangay.charCodeAt(i)
+    hash = hash & hash
+  }
+  return (Math.abs(hash) % 3) + 1 // Returns 1, 2, or 3
+}
+
 export default function ProfilePage() {
   const router = useRouter()
   const user = useAppStore((state) => state.user)
@@ -30,6 +40,11 @@ export default function ProfilePage() {
   }, [user, router])
 
   if (!user) return null
+
+  // Calculate user's dynamic rank
+  const userRank = (user.city && user.barangay) 
+    ? getUserRank(user.city, user.barangay)
+    : user.rank || 4
 
   const handleRedeem = (rewardId: string) => {
     setSelectedReward(rewardId)
@@ -86,7 +101,7 @@ export default function ProfilePage() {
             <div className="text-center">
               <div className="flex items-center justify-center gap-1 mb-1">
                 <Medal className="w-5 h-5 text-[var(--color-warning)]" />
-                <span className="text-2xl font-bold text-white">#{user.rank}</span>
+                <span className="text-2xl font-bold text-white">#{userRank}</span>
               </div>
               <p className="text-white/70 text-xs">Rank</p>
             </div>

@@ -9,6 +9,7 @@ export interface User {
   barangay: string
   rank: number
   photoURL?: string
+  barangayPoints?: number
 }
 
 export interface HazardComment {
@@ -724,6 +725,10 @@ export const useAppStore = create<AppState>()(
       
       addKilosPoints: (points) => set((state) => ({
         kilosPoints: state.kilosPoints + points,
+        user: state.user ? {
+          ...state.user,
+          barangayPoints: (state.user.barangayPoints || 0) + points,
+        } : null,
       })),
       
       deductKilosPoints: (points) => set((state) => ({

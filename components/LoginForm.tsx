@@ -89,7 +89,9 @@ export function LoginForm({ onSwitchToSignUp }: { onSwitchToSignUp: () => void }
           <div className="relative">
             <div className="absolute inset-0 rounded-full blur-2xl opacity-50" style={{ background: 'linear-gradient(135deg, #6A45FF, #8B5CF6)' }}></div>
             <div className="relative w-16 h-16 sm:w-24 sm:h-24 rounded-full flex items-center justify-center shadow-2xl" style={{ background: 'linear-gradient(135deg, #6A45FF, #8B5CF6)' }}>
-              <img src="https://i.imgur.com/b0cZRYy.png" alt="Logo" className="w-8 h-8 sm:w-12 sm:h-12" />
+              <svg className="w-8 h-8 sm:w-12 sm:h-12 text-white" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M13 2L3 14h8l-1 8 10-12h-8l1-8z" />
+              </svg>
             </div>
           </div>
         </motion.div>
@@ -202,7 +204,7 @@ export function LoginForm({ onSwitchToSignUp }: { onSwitchToSignUp: () => void }
               className="font-semibold hover:underline transition-all duration-200 hover:text-[#8B5CF6]"
               style={{ color: '#6A45FF' }}
             >
-              Sign in
+              Sign Up
             </button>
           </motion.p>
         </motion.div>

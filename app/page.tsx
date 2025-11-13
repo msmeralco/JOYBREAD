@@ -23,18 +23,12 @@ export default function Home() {
   }, [user, router])
 
   const handleSplashComplete = () => {
-    // Check if user has seen onboarding before (in real app, check localStorage)
-    const hasSeenOnboarding = localStorage.getItem('hasSeenOnboarding')
-    if (hasSeenOnboarding) {
-      setAppState('login')
-    } else {
-      setAppState('onboarding')
-    }
+    // Always show onboarding carousel
+    setAppState('onboarding')
   }
 
   const handleOnboardingComplete = () => {
-    localStorage.setItem('hasSeenOnboarding', 'true')
-    setAppState('signup')
+    setAppState('login')
   }
 
   if (appState === 'splash') {

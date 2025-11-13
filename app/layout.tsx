@@ -43,9 +43,11 @@ export default function RootLayout({
       <body className="antialiased overflow-x-hidden">
         <AuthProvider>
           <FirestoreProvider>
-            <RouteGuard>
+           <RouteGuard>
+            <div className="max-w-md mx-auto relative">
               {children}
-            </RouteGuard>
+            </div>
+          </RouteGuard>
           </FirestoreProvider>
         </AuthProvider>
       </body>
