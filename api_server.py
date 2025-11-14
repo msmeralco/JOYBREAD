@@ -106,7 +106,7 @@ def extract_features(img):
     
     features = []
     
-    # 1. ENHANCED COLOR FEATURES (42 features)
+    # 1. ENHANCED COLOR FEATURES (45 features - matching training)
     for channel in range(3):
         features.append(np.mean(img[:,:,channel]))
         features.append(np.std(img[:,:,channel]))
@@ -122,9 +122,11 @@ def extract_features(img):
     for channel in range(3):
         features.append(np.mean(lab[:,:,channel]))
         features.append(np.std(lab[:,:,channel]))
+        features.append(np.percentile(lab[:,:,channel], 25))
+        features.append(np.percentile(lab[:,:,channel], 75))
     
     for channel in range(3):
-        hist = cv2.calcHist([img], [channel], None, [4], [0, 256])
+        hist = cv2.calcHist([img], [channel], None, [3], [0, 256])  # 3 bins instead of 4
         features.extend(hist.flatten())
     
     # 2. TEXTURE FEATURES (9 features)
@@ -206,7 +208,7 @@ def extract_features(img):
     wire_mask = (hsv[:,:,1] < 30) & (hsv[:,:,2] < 100)
     features.append(np.sum(wire_mask) / gray.size)
     
-    # Spatial brightness distribution (6 more features)
+    # Spatial brightness distribution (6 features)
     h, w = gray.shape
     top_bright = np.mean(gray[:h//3, :])
     mid_bright = np.mean(gray[h//3:2*h//3, :])
@@ -218,17 +220,17 @@ def extract_features(img):
     center_bright = np.mean(gray[h//4:3*h//4, w//4:3*w//4])
     features.extend([left_bright, right_bright, center_bright])
     
-    # 5. ADVANCED TEXTURE FEATURES (15 features)
+    # 5. ADVANCED TEXTURE FEATURES (12 features to match 88 total)
     try:
         from skimage.feature import local_binary_pattern, graycomatrix, graycoprops
         
-        # LBP (5 features)
+        # LBP (4 features - reduced)
         radius = 3
         n_points = 8 * radius
         lbp = local_binary_pattern(gray, n_points, radius, method='uniform')
         lbp_hist, _ = np.histogram(lbp.ravel(), bins=10, range=(0, n_points + 2))
         lbp_hist = lbp_hist.astype(float) / (lbp_hist.sum() + 1e-6)
-        features.extend(lbp_hist[:5])
+        features.extend(lbp_hist[:4])
         
         # Gabor filters (4 features)
         ksize = 31
@@ -239,20 +241,21 @@ def extract_features(img):
             filtered = cv2.filter2D(gray, cv2.CV_32F, kernel)
             features.append(np.mean(np.abs(filtered)))
         
-        # GLCM (5 features)
+        # GLCM (4 features - reduced)
         gray_norm = (gray / (gray.max() + 1e-6) * 255).astype(np.uint8)
         glcm = graycomatrix(gray_norm, distances=[1], angles=[0, np.pi/4, np.pi/2, 3*np.pi/4], 
                             levels=256, symmetric=True, normed=True)
         features.append(graycoprops(glcm, 'contrast')[0, 0])
-        features.append(graycoprops(glcm, 'dissimilarity')[0, 0])
         features.append(graycoprops(glcm, 'homogeneity')[0, 0])
         features.append(graycoprops(glcm, 'energy')[0, 0])
         features.append(graycoprops(glcm, 'correlation')[0, 0])
     except Exception as e:
         # Fallback if skimage not available
-        features.extend([0] * 15)
+        features.extend([0] * 12)
     
-    return np.array(features)
+    feature_array = np.array(features)
+    print(f"🔍 DEBUG: Extracted {len(feature_array)} features")
+    return feature_array
 
 
 @app.route('/health', methods=['GET'])
