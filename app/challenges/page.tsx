@@ -38,31 +38,30 @@ function generateLeaderboardForCity(city: string, userBarangay: string, userBara
 
   const cityBarangays = barangayNames[city] || ['Barangay 1', 'Barangay 2', 'Barangay 3', 'Barangay 4', 'Barangay 5', 'Barangay 6']
   
-  // Hash the user's barangay to get consistent random position (1st, 2nd, or 3rd)
+  // Hash the user's barangay to get consistent random base points
   let hash = 0
   for (let i = 0; i < userBarangay.length; i++) {
     hash = ((hash << 5) - hash) + userBarangay.charCodeAt(i)
     hash = hash & hash
   }
-  const userPosition = (Math.abs(hash) % 3) + 1 // Will be 1, 2, or 3
+  const randomOffset = (Math.abs(hash) % 3) // 0, 1, or 2
   
   // Base simulated points for user's barangay (simulates other members' contributions)
-  const baseSimulatedPoints = 20000 - ((userPosition - 1) * 2000)
+  const baseSimulatedPoints = 18000 - (randomOffset * 1000)
   // Total barangay points = base simulated + user's actual contribution
   const totalBarangayPoints = baseSimulatedPoints + userBarangayPoints
   
   const leaderboard: LeaderboardEntry[] = []
-  let rank = 1
   
-  // Add top barangays before user (skip user's barangay)
-  for (let i = 0; i < userPosition - 1; i++) {
+  // Create all barangay entries
+  for (let i = 0; i < Math.min(cityBarangays.length, 8); i++) {
     const brgy = cityBarangays[i] || `Barangay ${i + 1}`
     if (brgy !== userBarangay) {
       leaderboard.push({
-        rank: rank++,
+        rank: 0, // Will be set after sorting
         name: brgy,
         location: city,
-        points: 20000 - (i * 2000),
+        points: 19000 - (i * 1500), // Other barangays get fixed points
         reduction: 25 - (i * 2),
         isCurrentUser: false,
       })
@@ -71,29 +70,19 @@ function generateLeaderboardForCity(city: string, userBarangay: string, userBara
   
   // Add user's barangay with total accumulated points
   leaderboard.push({
-    rank: userPosition,
+    rank: 0, // Will be set after sorting
     name: userBarangay,
     location: city,
     points: totalBarangayPoints, // Shows total of all members (simulated + user)
-    reduction: 25 - ((userPosition - 1) * 2),
+    reduction: 24, // User's barangay reduction
     isCurrentUser: true,
   })
-  rank = userPosition + 1
   
-  // Add remaining barangays (skip user's barangay)
-  for (let i = userPosition; i < Math.min(cityBarangays.length, 8); i++) {
-    const brgy = cityBarangays[i] || `Barangay ${i + 1}`
-    if (brgy !== userBarangay) {
-      leaderboard.push({
-        rank: rank++,
-        name: brgy,
-        location: city,
-        points: 20000 - (i * 2000),
-        reduction: 25 - (i * 2),
-        isCurrentUser: false,
-      })
-    }
-  }
+  // Sort by points (highest first) and assign ranks
+  leaderboard.sort((a, b) => b.points - a.points)
+  leaderboard.forEach((entry, index) => {
+    entry.rank = index + 1
+  })
   
   return leaderboard
 }
@@ -325,7 +314,7 @@ export default function ChallengesPage() {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: index * 0.1 }}
                     >
-                      <Card className={`p-6 ${isClaimed ? 'opacity-60' : ''}`}>
+                      <Card className={`p-6 ${isClaimed ? 'opacity-60 pointer-events-none' : ''}`}>
                         {/* Header */}
                         <div className="flex items-start justify-between mb-4">
                           <div className="flex items-start gap-3 flex-1">
@@ -335,10 +324,20 @@ export default function ChallengesPage() {
                             <div className="flex-1">
                               <h3 className="font-semibold text-white mb-1">
                                 {challenge.title}
+                                {isClaimed && <span className="ml-2 text-xs text-green-500">✓ Claimed</span>}
                               </h3>
                               <p className="text-sm text-[var(--color-muted)]">
                                 {challenge.description}
                               </p>
+                              {/* Peak Shift Special Button */}
+                              {challenge.challengeType === 'peak_shift' && !isClaimed && (
+                                <button
+                                  onClick={() => router.push('/peak-shift')}
+                                  className="mt-2 text-xs font-medium text-violet-400 hover:text-violet-300 flex items-center gap-1"
+                                >
+                                  → Start Peak Shift Session
+                                </button>
+                              )}
                             </div>
                           </div>
                           

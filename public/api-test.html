@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JOYBREAD - API Test</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+        }
+        .status {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+        .status.connected {
+            background: #d4edda;
+            color: #155724;
+            border: 2px solid #c3e6cb;
+        }
+        .status.disconnected {
+            background: #f8d7da;
+            color: #721c24;
+            border: 2px solid #f5c6cb;
+        }
+        .status.waiting {
+            background: #fff3cd;
+            color: #856404;
+            border: 2px solid #ffeaa7;
+        }
+        .data-card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .data-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .data-row:last-child {
+            border-bottom: none;
+        }
+        .data-label {
+            color: #666;
+            font-weight: 500;
+        }
+        .data-value {
+            color: #333;
+            font-weight: 700;
+        }
+        .consumption {
+            font-size: 48px;
+            font-weight: 700;
+            color: #667eea;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .badge.live {
+            background: #d4edda;
+            color: #155724;
+        }
+        .badge.challenge {
+            background: #e7d4f5;
+            color: #6f42c1;
+        }
+        .badge.peak {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .badge.offpeak {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+        .badge.normal {
+            background: #e2e3e5;
+            color: #383d41;
+        }
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+            transition: all 0.3s;
+        }
+        button:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .instructions {
+            background: #e7f3ff;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 5px;
+        }
+        .instructions h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        .instructions ol {
+            margin-left: 20px;
+        }
+        .instructions li {
+            margin: 5px 0;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔌 JOYBREAD API Test</h1>
+        <p class="subtitle">Real-time Smart Meter Data Monitor</p>
+        
+        <div id="status" class="status waiting">
+            ⏳ Waiting for data...
+        </div>
+
+        <div class="consumption" id="consumption">
+            ---.-- <span style="font-size: 24px;">kWh</span>
+        </div>
+
+        <div class="data-card">
+            <div class="data-row">
+                <span class="data-label">Meter ID</span>
+                <span class="data-value" id="meterId">--</span>
+            </div>
+            <div class="data-row">
+                <span class="data-label">Current Hour</span>
+                <span class="data-value" id="hour">--:--</span>
+            </div>
+            <div class="data-row">
+                <span class="data-label">Period</span>
+                <span class="data-value" id="period">--</span>
+            </div>
+            <div class="data-row">
+                <span class="data-label">Challenge Status</span>
+                <span class="data-value" id="challenge">--</span>
+            </div>
+            <div class="data-row">
+                <span class="data-label">Last Updated</span>
+                <span class="data-value" id="lastUpdate">--</span>
+            </div>
+        </div>
+
+        <button onclick="fetchData()">🔄 Refresh Data</button>
+
+        <div class="instructions">
+            <h3>📋 How to Test:</h3>
+            <ol>
+                <li>Make sure Next.js server is running: <code>npm run dev</code></li>
+                <li>Upload code to NodeMCU with your WiFi credentials</li>
+                <li>Press button on NodeMCU to start challenge</li>
+                <li>Watch this page update automatically every 2 seconds</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        let isLive = false;
+
+        async function fetchData() {
+            try {
+                const response = await fetch('/api/meter-data');
+                const result = await response.json();
+
+                if (result.success && result.data) {
+                    const data = result.data;
+                    
+                    // Update consumption
+                    document.getElementById('consumption').innerHTML = 
+                        `${data.consumption.toFixed(1)} <span style="font-size: 24px;">kWh</span>`;
+                    
+                    // Update meter ID
+                    document.getElementById('meterId').textContent = data.meterId || 'demo_meter_001';
+                    
+                    // Update hour
+                    const hourStr = String(data.hour).padStart(2, '0');
+                    document.getElementById('hour').textContent = `${hourStr}:00`;
+                    
+                    // Update period with badge
+                    const periodBadge = getPeriodBadge(data.period);
+                    document.getElementById('period').innerHTML = periodBadge;
+                    
+                    // Update challenge status
+                    const challengeBadge = data.challengeActive 
+                        ? '<span class="badge challenge">🚀 Active</span>'
+                        : '<span class="badge">⏸️ Standby</span>';
+                    document.getElementById('challenge').innerHTML = challengeBadge;
+                    
+                    // Update last update time
+                    const lastUpdateTime = new Date(data.lastUpdated).toLocaleTimeString();
+                    document.getElementById('lastUpdate').textContent = lastUpdateTime;
+                    
+                    // Check if data is live (within last 10 seconds)
+                    const lastUpdate = new Date(data.lastUpdated).getTime();
+                    const now = new Date().getTime();
+                    isLive = (now - lastUpdate) < 10000;
+                    
+                    // Update status
+                    const statusDiv = document.getElementById('status');
+                    if (isLive) {
+                        statusDiv.className = 'status connected';
+                        statusDiv.innerHTML = '🟢 LIVE - Receiving real-time data from NodeMCU';
+                    } else {
+                        statusDiv.className = 'status disconnected';
+                        statusDiv.innerHTML = '🔴 No recent data - Check NodeMCU connection';
+                    }
+                } else {
+                    throw new Error('No data received');
+                }
+            } catch (error) {
+                console.error('Error fetching data:', error);
+                const statusDiv = document.getElementById('status');
+                statusDiv.className = 'status disconnected';
+                statusDiv.innerHTML = '❌ Connection Error - Make sure server is running';
+            }
+        }
+
+        function getPeriodBadge(period) {
+            switch(period) {
+                case 'peak':
+                    return '<span class="badge peak">⚡ Peak Hours</span>';
+                case 'offpeak':
+                    return '<span class="badge offpeak">🌙 Off-Peak</span>';
+                default:
+                    return '<span class="badge normal">Normal Hours</span>';
+            }
+        }
+
+        // Auto-refresh every 2 seconds
+        setInterval(fetchData, 2000);
+        
+        // Initial fetch
+        fetchData();
+    </script>
+</body>
+</html>

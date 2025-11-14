@@ -1,9 +1,10 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { Zap, TrendingDown, ScanLine, Map, User, MessageSquare } from 'lucide-react'
+import { Zap, TrendingDown, ScanLine, Map, User, MessageSquare,Activity, Moon, Timer } from 'lucide-react'
+
 import { useAppStore } from '@/lib/store'
 import { BottomNav } from '@/components/BottomNav'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -11,18 +12,67 @@ import { Button } from '@/components/ui/button'
 import { formatCurrency, formatNumber, calculatePercentageChange } from '@/lib/utils'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from 'recharts'
 
+interface MeterData {
+  consumption: number
+  hour: number
+  challengeActive: boolean
+  period: string
+  timestamp: number
+  lastUpdated: string
+}
+
 export default function DashboardPage() {
   const router = useRouter()
   const user = useAppStore((state) => state.user)
   const kilosPoints = useAppStore((state) => state.kilosPoints)
-  const currentConsumption = useAppStore((state) => state.currentConsumption)
   const lastMonthConsumption = useAppStore((state) => state.lastMonthConsumption)
   const estimatedCost = useAppStore((state) => state.estimatedCost)
   const addKilosPoints = useAppStore((state) => state.addKilosPoints)
+  
+  // Real-time meter data from NodeMCU
+  const [meterData, setMeterData] = useState<MeterData>({
+    consumption: 350,
+    hour: 12,
+    challengeActive: false,
+    period: 'normal',
+    timestamp: 0,
+    lastUpdated: ''
+  })
+  const [isLive, setIsLive] = useState(false)
 
   const handleSecretPoints = () => {
     addKilosPoints(100)
   }
+
+  // Poll for real-time meter data
+  useEffect(() => {
+    const fetchMeterData = async () => {
+      try {
+        const response = await fetch('/api/meter-data')
+        const result = await response.json()
+        
+        if (result.success && result.data) {
+          setMeterData(result.data)
+          
+          // Check if data is recent (within last 10 seconds)
+          const lastUpdate = new Date(result.data.lastUpdated).getTime()
+          const now = new Date().getTime()
+          setIsLive((now - lastUpdate) < 10000)
+        }
+      } catch (error) {
+        console.error('Failed to fetch meter data:', error)
+        setIsLive(false)
+      }
+    }
+
+    // Initial fetch
+    fetchMeterData()
+
+    // Poll every 2 seconds
+    const interval = setInterval(fetchMeterData, 2000)
+
+    return () => clearInterval(interval)
+  }, [])
 
   useEffect(() => {
     if (!user) {
@@ -31,6 +81,9 @@ export default function DashboardPage() {
   }, [user, router])
 
   if (!user) return null
+
+  // Use real-time consumption from NodeMCU
+  const currentConsumption = meterData.consumption
 
   const consumptionChange = calculatePercentageChange(
     currentConsumption,
@@ -134,25 +187,62 @@ export default function DashboardPage() {
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
                 <span>Consumption Status</span>
-                {consumptionChange < 0 && (
-                  <span className="flex items-center gap-1 text-sm font-medium text-[var(--color-secondary)]">
-                    <TrendingDown className="w-4 h-4" />
-                    {Math.abs(consumptionChange).toFixed(1)}% vs last month
-                  </span>
-                )}
+                <div className="flex items-center gap-2">
+                  {isLive && (
+                    <span className="flex items-center gap-1 px-2 py-1 bg-green-500/20 text-green-400 text-xs rounded-full border border-green-500/30">
+                      <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+                      LIVE
+                    </span>
+                  )}
+                  {meterData.challengeActive && (
+                    <span className="px-2 py-1 bg-purple-500/20 text-purple-400 text-xs rounded-full border border-purple-500/30 animate-pulse">
+                      🚀 Challenge Active
+                    </span>
+                  )}
+                  {consumptionChange < 0 && (
+                    <span className="flex items-center gap-1 text-sm font-medium text-[var(--color-secondary)]">
+                      <TrendingDown className="w-4 h-4" />
+                      {Math.abs(consumptionChange).toFixed(1)}% vs last month
+                    </span>
+                  )}
+                </div>
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="mb-6">
                 <div className="flex items-baseline gap-2 mb-1">
-                  <span className="text-4xl font-bold text-white">
-                    {currentConsumption}
-                  </span>
+                  <motion.span 
+                    key={currentConsumption}
+                    initial={{ scale: 1.1, color: 'var(--color-primary)' }}
+                    animate={{ scale: 1, color: 'white' }}
+                    className="text-4xl font-bold text-white"
+                  >
+                    {currentConsumption.toFixed(1)}
+                  </motion.span>
                   <span className="text-[var(--color-muted)] text-sm">kWh</span>
                 </div>
-                <p className="text-[var(--color-muted)] text-sm">
-                  Last month: {lastMonthConsumption} kWh
-                </p>
+                <div className="flex items-center gap-2 text-sm">
+                  <p className="text-[var(--color-muted)]">
+                    Last month: {lastMonthConsumption} kWh
+                  </p>
+                  {meterData.period && (
+                    <>
+                      <span className="text-[var(--color-muted)]">•</span>
+                      <span className={`px-2 py-0.5 rounded text-xs ${
+                        meterData.period === 'peak' ? 'bg-red-500/20 text-red-400' :
+                        meterData.period === 'offpeak' ? 'bg-blue-500/20 text-blue-400' :
+                        'bg-gray-500/20 text-gray-400'
+                      }`}>
+                        {meterData.period === 'peak' ? '⚡ Peak Hours' :
+                         meterData.period === 'offpeak' ? '🌙 Off-Peak' :
+                         'Normal Hours'}
+                      </span>
+                      <span className="text-[var(--color-muted)]">
+                        {String(meterData.hour).padStart(2, '0')}:00
+                      </span>
+                    </>
+                  )}
+                </div>
               </div>
 
               <ResponsiveContainer width="100%" height={180}>
@@ -200,6 +290,37 @@ export default function DashboardPage() {
         {/* Quick Actions */}
         <motion.div variants={itemVariants}>
           <h3 className="text-lg font-semibold text-white mb-3">Quick Actions</h3>
+          
+          {/* Special Peak Shift Button */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.2 }}
+            className="mb-3"
+          >
+            <Button
+              onClick={() => router.push('/peak-shift')}
+              className="w-full h-20 bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 hover:from-violet-700 hover:via-purple-700 hover:to-indigo-700 text-white border-0 relative overflow-hidden group"
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
+              <div className="flex items-center justify-between w-full relative z-10">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
+                    <Moon className="w-6 h-6" />
+                  </div>
+                  <div className="text-left">
+                    <div className="font-bold text-lg">Peak Shift Challenge</div>
+                    <div className="text-xs text-white/80 flex items-center gap-1">
+                      <Timer className="w-3 h-3" />
+                      <span>1 hour · Earn up to 300 pts</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="text-2xl animate-pulse">🌙</div>
+              </div>
+            </Button>
+          </motion.div>
+
           <div className="grid grid-cols-2 gap-3">
             <Button
               onClick={() => router.push('/scan')}
