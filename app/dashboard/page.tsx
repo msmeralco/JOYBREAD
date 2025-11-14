@@ -3,7 +3,8 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { Zap, TrendingDown, ScanLine, Map, User, MessageSquare, Activity } from 'lucide-react'
+import { Zap, TrendingDown, ScanLine, Map, User, MessageSquare,Activity, Moon, Timer } from 'lucide-react'
+
 import { useAppStore } from '@/lib/store'
 import { BottomNav } from '@/components/BottomNav'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -289,6 +290,37 @@ export default function DashboardPage() {
         {/* Quick Actions */}
         <motion.div variants={itemVariants}>
           <h3 className="text-lg font-semibold text-white mb-3">Quick Actions</h3>
+          
+          {/* Special Peak Shift Button */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.2 }}
+            className="mb-3"
+          >
+            <Button
+              onClick={() => router.push('/peak-shift')}
+              className="w-full h-20 bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 hover:from-violet-700 hover:via-purple-700 hover:to-indigo-700 text-white border-0 relative overflow-hidden group"
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
+              <div className="flex items-center justify-between w-full relative z-10">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
+                    <Moon className="w-6 h-6" />
+                  </div>
+                  <div className="text-left">
+                    <div className="font-bold text-lg">Peak Shift Challenge</div>
+                    <div className="text-xs text-white/80 flex items-center gap-1">
+                      <Timer className="w-3 h-3" />
+                      <span>1 hour · Earn up to 300 pts</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="text-2xl animate-pulse">🌙</div>
+              </div>
+            </Button>
+          </motion.div>
+
           <div className="grid grid-cols-2 gap-3">
             <Button
               onClick={() => router.push('/scan')}

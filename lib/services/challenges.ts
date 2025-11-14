@@ -140,6 +140,19 @@ export async function updateChallengeProgress(
   }
 
   const data = docSnap.data();
+  
+  // Don't update if already claimed
+  if (data.status === 'claimed') {
+    console.log(`Challenge ${challengeType} already claimed, skipping progress update`);
+    return null;
+  }
+  
+  // Don't update if already completed (but not claimed yet)
+  if (data.currentValue >= data.targetValue) {
+    console.log(`Challenge ${challengeType} already completed, skipping progress update`);
+    return null;
+  }
+
   const newValue = data.currentValue + incrementBy;
   const isCompleted = newValue >= data.targetValue;
 
