@@ -2,8 +2,30 @@
  * Monthly Challenges Types
  */
 
-export type ChallengeType = 'bill_scan' | 'energy_reduction' | 'streak' | 'hazard_report';
+export type ChallengeType = 'bill_scan' | 'energy_reduction' | 'streak' | 'hazard_report' | 'peak_shift';
 export type ChallengeStatus = 'active' | 'completed' | 'claimed' | 'expired';
+
+export interface PeakShiftSession {
+  id: string;
+  userId: string;
+  startTime: Date;
+  endTime?: Date;
+  targetDuration: number; // in minutes (60 for 1 hour)
+  currentDuration: number; // in minutes
+  pointsEarned: number;
+  violations: number;
+  isActive: boolean;
+  baselineKwh: number; // kWh reading at start
+  kwhThreshold: number; // Max allowed increase
+  lastKwhReading: number;
+  warnings: Array<{
+    timestamp: Date;
+    kwhReading: number;
+    message: string;
+  }>;
+  createdAt: Date;
+  updatedAt: Date;
+}
 
 export interface MonthlyChallenge {
   id: string;
@@ -69,5 +91,14 @@ export const MONTHLY_CHALLENGES: ChallengeDefinition[] = [
     rewardPoints: 600,
     icon: '🛡️',
     color: 'from-purple-500 to-pink-600',
+  },
+  {
+    type: 'peak_shift',
+    title: 'Peak Shift Master',
+    description: 'Complete 5 peak shift sessions (1 hour each)',
+    targetValue: 5,
+    rewardPoints: 1500,
+    icon: '🌙',
+    color: 'from-violet-500 to-purple-600',
   },
 ];
